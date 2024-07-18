@@ -2,28 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gallery to search</title>
+    <title>Form</title>
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div class="container">
-      <form class="form">
-        <input
-          type="text"
-          id="search"
-          name="input"
-          placeholder="What are You looking for?"
-        />
-        <button type="submit" class="submit-btn">Search</button>
+    <header>
+      <form id="search-form" class="search-form">
+        <input type="text" name="query" placeholder="Search images..." />
+        <button type="submit">Search</button>
       </form>
-      <div class="loader-wrap">
-        <span class="preloader"></span>
-        <span class="loader">Loading images, please wait...</span>
-      </div>
-      <ul class="gallery"></ul>
-    </div>
+    </header>
+
+    <main>
+      <ul id="gallery" class="gallery"></ul>
+      <div id="loader" class="is-hidden"></div>
+      <button id="load-more" class="is-hidden">Load more</button>
+    </main>
 
     <script type="module" src="./main.js"></script>
   </body>

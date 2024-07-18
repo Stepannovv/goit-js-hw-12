@@ -1,107 +1,88 @@
+import { fetchImages } from './js/pixabay-api';
+import { renderGallery, clearGallery } from './js/render-functions';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
-import {
-  renderGallery,
-  clearGallery,
-  hide,
-  show,
-  disable,
-  enable,
-} from './js/render-functions';
-import { getPicturesByQuery } from './js/pixabay-apy';
+const searchForm = document.getElementById('search-form');
+const loadMoreBtn = document.getElementById('load-more');
+const loader = document.getElementById('loader');
 
-let currentPage = 1;
-let currentQuery = '';
+let query = '';
+let page = 1;
+const perPage = 15;
+let totalHits = 0;
 
-const searchForm = document.querySelector('.form');
-const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
-const loadMoreBtn = document.querySelector('.load-more');
+searchForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  query = event.target.elements.query.value.trim();
 
-searchForm.addEventListener('submit', handleSearch);
-
-async function handleSearch(evt) {
-  evt.preventDefault();
-  gallery.innerHTML = '';
-  const queryValue = evt.currentTarget.elements.query.value.trim();
-
-  if (!queryValue) {
-    iziToast.error({
-      title: 'Error',
-      message: '❌ Please enter a search query',
-    });
+  if (query === '') {
+    iziToast.error({ title: 'Error', message: 'Please enter a search query.' });
     return;
   }
 
-  loader.classList.remove('hidden');
-
-  currentQuery = queryValue;
-  currentPage = 1;
+  page = 1;
   clearGallery();
-  // лодер активний
-  hide(hiddenClass);
+  loadMoreBtn.classList.add('is-hidden');
+  loader.classList.remove('is-hidden');
 
   try {
-    const data = await getPicturesByQuery(queryValue, currentPage);
+    const data = await fetchImages(query, page, perPage);
+    totalHits = data.totalHits;
+
     if (data.hits.length === 0) {
       iziToast.warning({
-        title: 'No Results',
-        message: 'Sorry, there are no images matching your search query.',
+        title: 'No results',
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
       });
     } else {
       renderGallery(data.hits);
-      if (data.totalHits > currentPage * 15) {
-        // кнопка активна;
+      if (data.hits.length < totalHits) {
+        loadMoreBtn.classList.remove('is-hidden');
       }
     }
   } catch (error) {
-    onFetchError(error);
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again.',
+    });
   } finally {
-    loader.classList.add('hidden');
-    searchForm.reset();
+    loader.classList.add('is-hidden');
   }
-}
+});
 
-function onFetchError(error) {
-  iziToast.error({
-    title: 'Error',
-    message: '❌ No pictures found',
-  });
-}
-
-loadMoreBtn.addEventListener('click', loadMoreImages);
-async function loadMoreImages() {
-  currentPage += 1;
-  // лодер видимий
-  // кнопка неактивна
+loadMoreBtn.addEventListener('click', async () => {
+  page += 1;
+  loader.classList.remove('is-hidden');
+  loadMoreBtn.classList.add('is-hidden');
 
   try {
-    const data = await getPicturesByQuery(currentQuery, currentPage);
+    const data = await fetchImages(query, page, perPage);
     renderGallery(data.hits);
 
-    if (currentPage * 15 >= data.totalHits) {
+    const totalLoadedImages = page * perPage;
+    if (totalLoadedImages >= totalHits) {
       iziToast.info({
-        title: 'End of Results',
+        title: 'Info',
         message: "We're sorry, but you've reached the end of search results.",
       });
     } else {
-      // кнопка активна
+      loadMoreBtn.classList.remove('is-hidden');
     }
-    smoothScroll();
-  } catch (error) {
-    onFetchError(error);
-  } finally {
-    // лодер невидимий;
-  }
-}
 
-function smoothScroll() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery-item')
-    .getBoundingClientRect();
-  window.scrollBy({
-    top: cardHeight * 2,
-    behavior: 'smooth',
-  });
-}
+    // window.scrollBy(0, window.innerHeight);
+
+    const galleryItem = document.querySelector('.gallery-item');
+    const cardHeight = galleryItem.getBoundingClientRect().height;
+    window.scrollBy({ top: cardHeight * 4, behavior: 'smooth' });
+    console.log(cardHeight);
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again.',
+    });
+  } finally {
+    loader.classList.add('is-hidden');
+  }
+});
