@@ -71,8 +71,6 @@ loadMoreBtn.addEventListener('click', async () => {
       loadMoreBtn.classList.remove('is-hidden');
     }
 
-    // window.scrollBy(0, window.innerHeight);
-
     const galleryItem = document.querySelector('.gallery-item');
     const cardHeight = galleryItem.getBoundingClientRect().height;
     window.scrollBy({ top: cardHeight * 4, behavior: 'smooth' });
