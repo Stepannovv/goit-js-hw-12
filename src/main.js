@@ -9,7 +9,7 @@ const loader = document.getElementById('loader');
 
 let query = '';
 let page = 1;
-const perPage = 15;
+const perPage = 16;
 let totalHits = 0;
 
 searchForm.addEventListener('submit', async event => {
